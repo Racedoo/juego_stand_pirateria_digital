@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Quiz: ¿Sitio de streaming legal?</title>
+<style>
+  body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin:0; background:#0f1724; color:#e6eef8; display:flex; align-items:center; justify-content:center; min-height:100vh; }
+  .card { width:920px; max-width:96%; background: linear-gradient(180deg,#0b1220,#0b1426); border-radius:12px; box-shadow: 0 10px 30px rgba(2,6,23,0.7); overflow:hidden; }
+  .header { display:flex; gap:16px; padding:18px; align-items:center; border-bottom:1px solid rgba(255,255,255,0.04); }
+  .logo { width:140px; height:56px; background:linear-gradient(90deg,#ff4d4f,#ff9a3c); border-radius:6px; display:flex; align-items:center; justify-content:center; font-weight:700; letter-spacing:1px; color:#08101a; }
+  .meta { flex:1; }
+  .title { font-size:18px; margin:0; color:#dff1ff; }
+  .subtitle { margin:4px 0 0 0; font-size:12px; color:#98b9c9; }
+  .content { display:flex; gap:18px; padding:18px; }
+  .mocksite { flex:1; background:#041024; border-radius:8px; padding:12px; min-height:340px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.02); }
+  .topbar { display:flex; gap:12px; align-items:center; margin-bottom:12px; }
+  .url { background:#062039; padding:8px 10px; border-radius:6px; font-family:monospace; font-size:13px; color:#9fd2ff; }
+  .badge { background:rgba(255,255,255,0.05); padding:6px 8px; border-radius:6px; font-size:12px; color:#bfe7ff; }
+  .hero { background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); height:180px; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#cceaff; font-weight:600; font-size:20px; position:relative; overflow:hidden; }
+  .ads { position:absolute; right:8px; top:8px; background:#ffd6d6; color:#330000; padding:6px 8px; border-radius:6px; font-size:12px; transform:rotate(-6deg); }
+  .row { display:flex; gap:10px; margin-top:12px; }
+  .tile { flex:1; height:86px; background:#021227; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#9fd2ff; font-weight:600; }
+  .panel { width:360px; min-width:300px; display:flex; flex-direction:column; gap:12px; }
+  .question { background:linear-gradient(180deg,#071526,#071a2b); padding:14px; border-radius:8px; font-size:16px; color:#e6f6ff; }
+  .options { display:flex; flex-direction:column; gap:8px; }
+  button.opt { background:#062639; border:1px solid rgba(255,255,255,0.03); padding:10px 12px; border-radius:8px; color:#bfe7ff; text-align:left; cursor:pointer; font-size:14px; }
+  button.opt:hover { transform:translateY(-2px); }
+  .feedback { min-height:58px; padding:10px; border-radius:8px; background:rgba(255,255,255,0.02); color:#d7f0ff; font-size:13px; }
+  .score { text-align:right; color:#9fd2ff; font-weight:600; font-size:14px; }
+  .footer { display:flex; justify-content:space-between; align-items:center; padding:12px 18px; border-top:1px solid rgba(255,255,255,0.03); color:#9fbfcf; font-size:13px; }
+  .hint { font-size:12px; color:#9fbfcf; }
+  .btn-small { background:#0b93ff; border:none; padding:8px 12px; color:#021026; border-radius:8px; cursor:pointer; font-weight:700; }
+  @media (max-width:880px){ .content{flex-direction:column;} .panel{width:100%;} .mocksite{min-height:220px} }
+</style>
+</head>
+<body>
+  <div class="card" role="application" aria-label="Juego detecta sitio pirata">
+    <div class="header">
+      <div class="logo">STREAM-DEMO</div>
+      <div class="meta">
+        <p class="title">¿Es esta web un servicio legal de streaming?</p>
+        <p class="subtitle">Identificá las señales de alerta — ganá puntos y aprendé por qué son riesgosas.</p>
+      </div>
+      <div style="text-align:right">
+        <div class="score" id="score">Puntos: 0</div>
+        <div style="font-size:12px;color:#7fb0c6">Nivel: 1 / 4</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="mocksite" aria-hidden="true">
+        <div class="topbar">
+          <div class="url" id="urlDisplay">http://super-streaming-free1234.biz/watch</div>
+          <div class="badge">Sin HTTPS</div>
+        </div>
+        <div class="hero" id="hero">
+          <!-- Hero cambia por nivel -->
+          <div class="ads" id="fakeAd">AD: Descargá el reproductor ahora!</div>
+          <div id="heroText">Estreno — Película X (1080p)</div>
+        </div>
+        <div class="row" id="tiles">
+          <div class="tile">Recomendado</div>
+          <div class="tile">Últimos agregados</div>
+          <div class="tile">Top gratis</div>
+        </div>
+      </div>
+
+      <div class="panel" role="region" aria-label="Preguntas">
+        <div class="question" id="questionText">¿Es este sitio un servicio legal de streaming?</div>
+        <div class="options" id="options">
+          <!-- opciones generadas -->
+        </div>
+        <div class="feedback" id="feedback">Seleccioná una opción para ver la explicación.</div>
+        <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;">
+          <div class="hint" id="hintText">Consejo: fijate el dominio, la presencia de anuncios y si pide instalar algo.</div>
+          <div>
+            <button class="btn-small" id="nextBtn" onclick="nextLevel()" disabled> Siguiente </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div>Demostración educativa — no contiene enlaces reales.</div>
+      <div>Stand Pirateria Digital • Consejos anti-piratería</div>
+    </div>
+  </div>
+
+<script>
+const levels = [
+  { url: "http://super-streaming-free1234.biz/watch", https:false, ads:true, installer:true, desc:"Ofrece estrenos y pide instalar un reproductor. Dominio raro.", correct:false },
+  { url: "https://official-cinema-demo.com", https:true, ads:false, installer:false, desc:"Sitio con certificado, sin anuncios, usa dominio claro y botón 'Ver en cuenta' (legal).", correct:true },
+  { url: "http://movievault-downloads.cc", https:false, ads:true, installer:false, desc:"Ofrece .zip/.exe para descargar películas — muy sospechoso.", correct:false },
+  { url: "https://streaming-edu.test", https:true, ads:false, installer:false, desc:"Servicio educativo con licencias y referencias — parece legal.", correct:true }
+];
+
+let idx = 0, score = 0;
+
+function render(){
+  const lvl = levels[idx];
+  document.getElementById('urlDisplay').textContent = lvl.url;
+  document.getElementById('heroText').textContent = (lvl.correct? "Catálogo oficial — Temporada disponible" : "¡Estreno ya! Descargá aquí");
+  document.getElementById('fakeAd').style.display = lvl.ads ? 'block' : 'none';
+  document.getElementById('questionText').textContent = "¿Creés que este sitio es legal o sospechoso?";
+  const opts = [
+    { text: "Es legal (servicio autorizado)", val:true },
+    { text: "Es sospechoso / pirata", val:false }
+  ];
+  const optionsDiv = document.getElementById('options');
+  optionsDiv.innerHTML = "";
+  opts.forEach(o=>{
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.textContent = o.text;
+    btn.onclick = ()=>answer(o.val, lvl);
+    optionsDiv.appendChild(btn);
+  });
+  document.getElementById('feedback').textContent = "Seleccioná una opción para ver la explicación.";
+  document.getElementById('nextBtn').disabled = true;
+  document.getElementById('score').textContent = "Puntos: " + score;
+  document.querySelector('.logo').textContent = idx===1 ? "CINEMA" : "STREAM-DEMO";
+  // badge
+  const badge = document.querySelector('.badge');
+  if(lvl.https) badge.style.background = "rgba(34,197,94,0.12)", badge.textContent = "HTTPS";
+  else badge.style.background = "rgba(255,80,80,0.08)", badge.textContent = "Sin HTTPS";
+}
+
+function answer(choice, lvl){
+  const feedback = document.getElementById('feedback');
+  let correct = (choice === lvl.correct);
+  if(correct){
+    score += 10;
+    feedback.innerHTML = "<b>Correcto.</b> " + lvl.desc;
+  } else {
+    feedback.innerHTML = "<b>Error.</b> " + lvl.desc + " <br><small>¿Por qué?: fijate en dominios raros, anuncios invasivos, descargas .exe o pedir instalar reproductores.</small>";
+  }
+  document.getElementById('score').textContent = "Puntos: " + score;
+  document.getElementById('nextBtn').disabled = false;
+  // optionally disable options
+  document.querySelectorAll('button.opt').forEach(b=>b.disabled=true);
+}
+
+function nextLevel(){
+  idx++;
+  if(idx >= levels.length){
+    // final screen
+    document.body.innerHTML = `
+      <div style="font-family:Inter,system-ui;padding:40px;background:#041028;color:#e6f6ff;min-height:100vh;display:flex;align-items:center;justify-content:center;">
+        <div style="max-width:760px;background:#071428;padding:30px;border-radius:14px;box-shadow:0 20px 50px rgba(3,8,18,0.7)">
+          <h1 style="margin:0 0 8px 0">¡Juego terminado!</h1>
+          <p style="margin:4px 0 16px 0">Puntos finales: <strong>${score}</strong></p>
+          <p style="margin:0 0 16px 0">Explicación corta:</p>
+          <ul>
+            <li>Dominios confusos y sin HTTPS suelen ser ilegales o peligrosos.</li>
+            <li>Descargas directas de archivos para ver películas (.exe, .zip) son un gran riesgo.</li>
+            <li>Los servicios legales piden iniciar sesión con una cuenta existente y usan HTTPS y políticas claras.</li>
+          </ul>
+          <p style="margin-top:16px">Si querés, podés reiniciar para que otro visitante lo juegue.</p>
+          <div style="display:flex;gap:12px;margin-top:18px">
+            <button onclick="location.reload()" style="padding:10px 14px;border-radius:8px;border:none;background:#0b93ff;color:#021026;font-weight:700">Reiniciar</button>
+          </div>
+        </div>
+      </div>`;
+    return;
+  }
+  render();
+}
+
+// init
+render();
+</script>
+</body>
+</html>
